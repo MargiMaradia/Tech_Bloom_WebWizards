@@ -11,38 +11,33 @@ function Cart() {
   const [updating, setUpdating] = useState({});
   const navigate = useNavigate();
 
+  // === LocalStorage helpers for guest cart ===
+  const getGuestCart = () => JSON.parse(localStorage.getItem('guest_cart') || '[]');
+  const saveGuestCart = (items) => localStorage.setItem('guest_cart', JSON.stringify(items));
+
   useEffect(() => {
     fetchCartItems();
   }, []);
 
   const fetchCartItems = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // Guest cart
+      const guestItems = getGuestCart();
+      setCartItems(guestItems);
+      setTotalPrice(guestItems.reduce((sum, i) => sum + (i.subtotal || i.price * i.quantity), 0));
+      setLoading(false);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setError('Please login to view your cart');
-        setLoading(false);
-        return;
-      }
-
-      console.log('🛒 Fetching cart items...');
-      
       const response = await axios.get('http://localhost:5000/api/cart', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
-
-      console.log('✅ Cart data received:', response.data);
-      
       setCartItems(response.data.items || []);
       setTotalPrice(parseFloat(response.data.total) || 0);
       setLoading(false);
-
     } catch (err) {
-      console.error('❌ Failed to fetch cart:', err);
-      
       if (err.response?.status === 401) {
         setError('Session expired. Please login again.');
         localStorage.removeItem('token');
@@ -54,286 +49,166 @@ function Cart() {
     }
   };
 
-  // Recalculate total price whenever cartItems change
+  // Recalculate total
   const recalculateTotal = useCallback(() => {
-    const total = cartItems.reduce((sum, item) => sum + parseFloat(item.subtotal || 0), 0);
+    const total = cartItems.reduce((sum, item) => sum + parseFloat(item.subtotal || item.price * item.quantity), 0);
     setTotalPrice(total);
   }, [cartItems]);
 
-  useEffect(() => {
-    recalculateTotal();
-  }, [cartItems, recalculateTotal]);
+  useEffect(() => { recalculateTotal(); }, [cartItems, recalculateTotal]);
 
   const updateQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     setUpdating(prev => ({ ...prev, [itemId]: true }));
-    
-    try {
-      const token = localStorage.getItem('token');
-      
-      await axios.put('http://localhost:5000/api/cart/update', {
-        itemId: itemId,
-        quantity: newQuantity
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+    const token = localStorage.getItem('token');
 
-      // Update local state immediately for better UX
-      setCartItems(prevItems =>
-        prevItems.map(item =>
-          item._id === itemId 
-            ? { ...item, quantity: newQuantity, subtotal: (item.price * newQuantity).toFixed(2) }
-            : item
-        )
-      );
-
+    if (!token) {
+      // Guest cart
+      const updated = cartItems.map(item => item._id === itemId ? { ...item, quantity: newQuantity, subtotal: item.price * newQuantity } : item);
+      setCartItems(updated);
+      saveGuestCart(updated);
       setUpdating(prev => ({ ...prev, [itemId]: false }));
-      console.log('✅ Quantity updated successfully');
-      
+      return;
+    }
+
+    // Logged-in user
+    try {
+      await axios.put('http://localhost:5000/api/cart/update', { itemId, quantity: newQuantity }, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      const updated = cartItems.map(item => item._id === itemId ? { ...item, quantity: newQuantity, subtotal: (item.price * newQuantity).toFixed(2) } : item);
+      setCartItems(updated);
+      setUpdating(prev => ({ ...prev, [itemId]: false }));
     } catch (err) {
-      console.error('❌ Failed to update quantity:', err);
       alert('Failed to update item quantity');
       setUpdating(prev => ({ ...prev, [itemId]: false }));
     }
   };
 
   const removeItem = async (itemId) => {
-    if (!window.confirm('Are you sure you want to remove this item from cart?')) {
+    if (!window.confirm('Remove this item?')) return;
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      const updated = cartItems.filter(item => item._id !== itemId);
+      setCartItems(updated);
+      saveGuestCart(updated);
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
-      
       await axios.delete(`http://localhost:5000/api/cart/remove/${itemId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
-
-      // Remove item from local state
-      setCartItems(prevItems => prevItems.filter(item => item._id !== itemId));
-      console.log('✅ Item removed successfully');
-      
+      setCartItems(prev => prev.filter(item => item._id !== itemId));
     } catch (err) {
-      console.error('❌ Failed to remove item:', err);
-      alert('Failed to remove item from cart');
+      alert('Failed to remove item');
     }
-  };
-
-  const handleCheckout = () => {
-    if (cartItems.length === 0) {
-      alert('Your cart is empty');
-      return;
-    }
-
-    // Navigate to buy-now page with cart data
-    const checkoutData = {
-      items: cartItems,
-      total: totalPrice,
-      type: 'cart_checkout'
-    };
-    
-    // Store checkout data temporarily
-    sessionStorage.setItem('checkoutData', JSON.stringify(checkoutData));
-    
-    // Navigate to buy-now page
-    navigate('/buy-now/cart-checkout');
   };
 
   const clearCart = async () => {
-    if (!window.confirm('Are you sure you want to clear your entire cart?')) {
+    if (!window.confirm('Clear entire cart?')) return;
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setCartItems([]);
+      saveGuestCart([]);
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
-      
       await axios.delete('http://localhost:5000/api/cart/clear', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
-
       setCartItems([]);
-      setTotalPrice(0);
-      console.log('✅ Cart cleared successfully');
-      
     } catch (err) {
-      console.error('❌ Failed to clear cart:', err);
       alert('Failed to clear cart');
     }
   };
 
-  if (loading) {
-    return (
-      <div className="cart-container">
-        <div className="loading">
-          <h2>Loading your cart...</h2>
-          <div className="spinner"></div>
-        </div>
-      </div>
-    );
-  }
+  const handleCheckout = () => {
+    if (cartItems.length === 0) return alert('Cart is empty');
 
-  if (error) {
-    return (
-      <div className="cart-container">
-        <div className="error">
-          <h2>Cart Error</h2>
-          <p>{error}</p>
-          <button onClick={() => navigate('/login')} className="btn-primary">
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
+    sessionStorage.setItem('checkoutData', JSON.stringify({
+      items: cartItems,
+      total: totalPrice,
+      type: 'cart_checkout'
+    }));
+
+    navigate('/buy-now/cart-checkout');
+  };
+
+  if (loading) return <div className="cart-container"><h2>Loading...</h2></div>;
+  if (error) return <div className="cart-container"><h2>{error}</h2><button onClick={() => navigate('/login')}>Login</button></div>;
 
   return (
-    <div className="cart-container">
-      <div className="cart-header">
-        <div className="header-content">
-          <h2>Your Shopping Cart</h2>
-          <p className="cart-count">
-            {cartItems.length === 0 ? 'No items in cart' : `${cartItems.length} item(s) in cart`}
-          </p>
-        </div>
-        {cartItems.length > 0 && (
-          <button onClick={clearCart} className="btn-clear">
-            Clear Cart
-          </button>
-        )}
+  <div className="cart-container">
+    {cartItems.length === 0 ? (
+      <div className="empty-cart">
+        <h3>Your cart is empty!</h3>
+        <button className="continue-btn" onClick={() => navigate('/products')}>
+          Continue Shopping
+        </button>
       </div>
+    ) : (
+      <>
+        <div className="cart-items">
+          {cartItems.map(item => (
+            <div key={item._id || item.id} className="cart-item-card">
+              <div className="cart-item-left">
+                <img 
+                  src={item.image || '/placeholder-image.jpg'} 
+                  alt={item.name || item.title} 
+                  className="cart-item-image"
+                />
+              </div>
 
-      {cartItems.length === 0 ? (
-        <div className="empty-cart">
-          <div className="empty-icon">🛒</div>
-          <h3>Your cart is empty!</h3>
-          <p>Add some products to your cart to see them here.</p>
-          <button onClick={() => navigate('/products')} className="btn-primary">
-            Continue Shopping
-          </button>
+              <div className="cart-item-middle">
+                <h4 className="cart-item-title">{item.name || item.title}</h4>
+                <p className="cart-item-price">₹{item.price}</p>
+                <p className="cart-item-subtotal">
+                  Subtotal: ₹{(item.subtotal || item.price * item.quantity).toFixed(2)}
+                </p>
+                <input
+                  type="number"
+                  value={item.quantity}
+                  min="1"
+                  className="cart-quantity-input"
+                  onChange={e => updateQuantity(item._id || item.id, parseInt(e.target.value))}
+                  disabled={updating[item._id || item.id]}
+                />
+              </div>
+
+              <div className="cart-item-right">
+                <button 
+                  className="remove-btn" 
+                  onClick={() => removeItem(item._id || item.id)}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      ) : (
-        <>
-          <div className="cart-items">
-            {cartItems.map((item) => (
-              <div key={item._id} className="cart-item">
-                <div className="item-image">
-                  <img 
-                    src={item.image || '/placeholder-image.jpg'} 
-                    alt={item.name}
-                    onError={(e) => {
-                      e.target.src = '/placeholder-image.jpg';
-                    }}
-                  />
-                </div>
-                
-                <div className="item-details">
-                  <h3>{item.name}</h3>
-                  <p className="item-description">{item.description}</p>
-                  <p className="item-category">Category: {item.category}</p>
-                  <p className="item-price">₹{item.price}</p>
-                </div>
-                
-                <div className="item-quantity">
-                  <label>Quantity:</label>
-                  <div className="quantity-controls">
-                    <button 
-                      onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                      disabled={item.quantity <= 1 || updating[item._id]}
-                      className="qty-btn"
-                      aria-label="Decrease quantity"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      max="99"
-                      value={item.quantity}
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        if (value > 0 && value <= 99) {
-                          updateQuantity(item._id, value);
-                        }
-                      }}
-                      className="quantity-input"
-                      disabled={updating[item._id]}
-                    />
-                    <button 
-                      onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                      disabled={updating[item._id] || item.quantity >= 99}
-                      className="qty-btn"
-                      aria-label="Increase quantity"
-                    >
-                      +
-                    </button>
-                  </div>
-                  {updating[item._id] && <span className="updating">Updating...</span>}
-                </div>
-                
-                <div className="item-subtotal">
-                  <p><strong>₹{item.subtotal}</strong></p>
-                </div>
-                
-                <div className="item-actions">
-                  <button 
-                    onClick={() => removeItem(item._id)}
-                    className="btn-remove"
-                    aria-label={`Remove ${item.name} from cart`}
-                  >
-                    🗑️ Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
 
-          <div className="cart-summary">
-            <div className="summary-details">
-              <h3>Order Summary</h3>
-              <div className="summary-line">
-                <span>Items ({cartItems.length}):</span>
-                <span>₹{totalPrice.toFixed(2)}</span>
-              </div>
-              <div className="summary-line">
-                <span>Shipping:</span>
-                <span className="free-shipping">FREE</span>
-              </div>
-              <div className="summary-line total">
-                <span><strong>Total:</strong></span>
-                <span><strong>₹{totalPrice.toFixed(2)}</strong></span>
-              </div>
-            </div>
-            
-            <div className="checkout-actions">
-              <button 
-                onClick={() => navigate('/products')} 
-                className="btn-secondary"
-              >
-                Continue Shopping
-              </button>
-              <button 
-                onClick={handleCheckout} 
-                className="btn-checkout"
-                disabled={cartItems.length === 0}
-              >
-                Proceed to Checkout ({cartItems.length})
-              </button>
-            </div>
+        <div className="cart-summary">
+          <h3>Total: ₹{totalPrice.toFixed(2)}</h3>
+          <div className="cart-actions">
+            <button onClick={() => navigate('/products')} className="continue-btn">
+              Continue Shopping
+            </button>
+            <button onClick={handleCheckout} className="checkout-btn">
+              Checkout
+            </button>
+            <button onClick={clearCart} className="clear-btn">
+              Clear Cart
+            </button>
           </div>
-        </>
-      )}
-    </div>
-  );
+        </div>
+      </>
+    )}
+  </div>
+);
 }
-
 export default Cart;

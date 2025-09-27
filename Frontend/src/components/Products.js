@@ -29,64 +29,58 @@ function Products() {
     }
   };
 
-  const handleAddToCart = async (product) => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        alert('Please login to add products to cart');
-        navigate('/login');
-        return;
-      }
+const handleAddToCart = (product) => {
+  const token = localStorage.getItem('token');
 
-      // Set loading state for this specific product
-      setAddingToCart(prev => ({ ...prev, [product.id]: true }));
+  if (!token) {
+    // Guest cart in localStorage
+    let guestCart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
 
-      console.log('Adding product to cart:', product.id);
-
-      const response = await axios.post('http://localhost:5000/api/cart/add', {
-        productId: product.id.toString(),
+    // Check if product already exists in cart
+    const existing = guestCart.find(item => item.id === product.id);
+    if (existing) {
+      existing.quantity += 1;
+      existing.subtotal = existing.quantity * product.price;
+    } else {
+      guestCart.push({
+        id: product.id,
+        title: product.title,
+        price: product.price,
         quantity: 1,
-        productDetails: {
-          title: product.title,
-          price: product.price,
-          thumbnail: product.thumbnail,
-          description: product.description,
-          category: product.category,
-          stock: product.stock || 100
-        }
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        subtotal: product.price,
+        image: product.thumbnail,
+        description: product.description,
+        category: product.category,
+        
       });
-
-      console.log('✅ Add to cart response:', response.data);
-      alert(`✅ ${product.title} added to cart successfully!`);
-      
-    } catch (error) {
-      console.error('Add to cart error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      if (error.response?.status === 401) {
-        alert('Session expired. Please login again.');
-        localStorage.removeItem('token');
-        navigate('/login');
-      } else if (error.response?.status === 404) {
-        alert('Product not found in our system.');
-      } else {
-        const errorMessage = error.response?.data?.message || 'Failed to add to cart';
-        alert(`❌ Error: ${errorMessage}`);
-      }
-    } finally {
-      // Remove loading state for this product
-      setAddingToCart(prev => ({ ...prev, [product.id]: false }));
     }
-  };
+
+    localStorage.setItem('guest_cart', JSON.stringify(guestCart));
+    alert(`✅ ${product.title} added to cart successfully!`);
+    return;
+  }
+
+  // Logged-in user — keep your existing axios API logic
+  setAddingToCart(prev => ({ ...prev, [product.id]: true }));
+  axios.post('http://localhost:5000/api/cart/add', {
+    productId: product.id.toString(),
+    quantity: 1,
+    productDetails: {
+      title: product.title,
+      price: product.price,
+      thumbnail: product.thumbnail,
+      description: product.description,
+      category: product.category,
+      stock: product.stock || 100
+    }
+  }, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+  })
+  .then(res => alert(`✅ ${product.title} added to cart successfully!`))
+  .catch(err => alert('Failed to add to cart'))
+  .finally(() => setAddingToCart(prev => ({ ...prev, [product.id]: false })));
+};
+
 
   const handleBuyNow = (product) => {
     const token = localStorage.getItem('token');
