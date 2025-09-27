@@ -2,50 +2,67 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// Clean, conflict-free Navbar implementation (inline styles)
-const Navbar = ({ user, setUser, cartCount = 0 }) => {
+const Navbar = ({ user, setUser }) => {
   const navigate = useNavigate();
   const [cartItemCount, setCartItemCount] = useState(0);
   const [userProfile, setUserProfile] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(false);
 
+  // --- Helper for guest cart ---
+  const getGuestCart = () => JSON.parse(localStorage.getItem('guest_cart') || '[]');
+
+  // --- Fetch cart count and user profile ---
   useEffect(() => {
-    if (user) {
-      fetchCartCount();
-      fetchUserProfile();
-    } else {
-      setCartItemCount(0);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    updateCartCount();
+    if (user) fetchUserProfile();
+
+    // Listen for guest cart changes in other tabs
+    const handleStorageChange = () => updateCartCount();
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [user]);
 
-  const fetchCartCount = async () => {
+  // Fetch logged-in user's profile
+  const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (token) {
+      if (!token) return;
+      const response = await axios.get('http://localhost:5000/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserProfile(response.data.user);
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+    }
+  };
+
+  // Fetch cart count (API for logged-in or localStorage for guest)
+  const updateCartCount = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
         const response = await axios.get('http://localhost:5000/api/cart', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCartItemCount(response.data.itemCount || 0);
+      } catch (err) {
+        console.error('Failed to fetch cart count:', err);
       }
-    } catch (error) {
-      console.error('Failed to fetch cart count:', error);
+    } else {
+      const guestCart = getGuestCart();
+      const count = guestCart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      setCartItemCount(count);
     }
   };
 
-  const fetchUserProfile = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const response = await axios.get('http://localhost:5000/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUserProfile(response.data.user);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user profile:', error);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setUserProfile(null);
+    setCartItemCount(0);
+    navigate('/');
   };
+
+  const handleProfileClick = () => navigate('/profile');
 
   const navbarStyle = {
     backgroundColor: 'var(--footer-bg)',
@@ -60,271 +77,41 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
     zIndex: 1000
   };
 
-  const logoStyle = {
-    fontSize: '1.5rem',
-    fontWeight: '800',
-    color: 'var(--text)',
-    textDecoration: 'none',
-    transition: 'color 0.3s ease'
-  };
-
-  const linksContainerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2rem'
-  };
-
-  const navLinksStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1.5rem'
-  };
-
-  const linkStyle = {
-    color: 'var(--muted)',
-    textDecoration: 'none',
-    padding: '0.5rem 1rem',
-    borderRadius: '4px',
-    transition: 'all 0.18s ease',
-    fontSize: '16px',
-    fontWeight: 700
-  };
-
-  const authSectionStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem'
-  };
-
-  const buttonStyle = {
-    backgroundColor: 'var(--accent)',
-    color: '#fff',
-    border: 'none',
-    padding: '0.5rem 1rem',
-    borderRadius: '20px',
-    textDecoration: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.18s ease',
-    fontSize: '14px',
-    fontWeight: '800',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5rem'
-  };
-
-  const cartButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: 'var(--accent)',
-    position: 'relative'
-  };
-
-  const ordersButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: 'var(--accent)'
-  };
-
-  const profileButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: 'var(--accent)'
-  };
-
-  const logoutButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: 'var(--danger)'
-  };
-
-  const signupButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: 'var(--accent-2)',
-    color: 'var(--text)'
-  };
-
-  const badgeStyle = {
-    position: 'absolute',
-    top: '-8px',
-    right: '-8px',
-    backgroundColor: 'var(--danger)',
-    color: '#fff',
-    borderRadius: '50%',
-    width: '20px',
-    height: '20px',
-    fontSize: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontWeight: 'bold',
-    border: '2px solid var(--footer-bg)'
-  };
-
-  const userDropdownStyle = {
-    position: 'absolute',
-    top: '100%',
-    right: 0,
-    backgroundColor: 'white',
-    color: '#333',
-    borderRadius: '8px',
-    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
-    padding: '1rem',
-    minWidth: '250px',
-    zIndex: 1001,
-    display: 'none'
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setUserProfile(null);
-    setCartItemCount(0);
-    navigate('/');
-  };
-
-  const handleProfileClick = () => {
-    navigate('/profile');
-  };
+  const logoStyle = { fontSize: '1.5rem', fontWeight: '800', color: 'var(--text)', textDecoration: 'none' };
+  const linksContainerStyle = { display: 'flex', alignItems: 'center', gap: '2rem' };
+  const navLinksStyle = { display: 'flex', alignItems: 'center', gap: '1.5rem' };
+  const linkStyle = { color: 'var(--muted)', textDecoration: 'none', padding: '0.5rem 1rem', borderRadius: '4px', fontWeight: 700 };
+  const authSectionStyle = { display: 'flex', alignItems: 'center', gap: '1rem' };
+  const buttonStyle = { backgroundColor: 'var(--accent)', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', fontWeight: '800' };
+  const cartButtonStyle = { ...buttonStyle, position: 'relative' };
+  const logoutButtonStyle = { ...buttonStyle, backgroundColor: 'var(--danger)' };
+  const signupButtonStyle = { ...buttonStyle, backgroundColor: 'var(--accent-2)', color: 'var(--text)' };
+  const badgeStyle = { position: 'absolute', top: '-8px', right: '-8px', backgroundColor: 'var(--danger)', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: '2px solid var(--footer-bg)' };
 
   return (
     <nav style={navbarStyle}>
-      <Link to="/" style={logoStyle}>
-        ShopEase
-      </Link>
-
+      <Link to="/" style={logoStyle}>ShopEase</Link>
       <div style={linksContainerStyle}>
         <div style={navLinksStyle}>
-          <Link
-            to="/"
-            style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
-            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
-          >
-            Home
-          </Link>
-          <Link
-            to="/products"
-            style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
-            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
-          >
-            Products
-          </Link>
-          <Link
-            to="/about"
-            style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
-            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
-          >
-            About
-          </Link>
-          <Link
-            to="/contact"
-            style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
-            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
-          >
-            Contact
-          </Link>
+          <Link to="/" style={linkStyle}>Home</Link>
+          <Link to="/products" style={linkStyle}>Products</Link>
+          <Link to="/about" style={linkStyle}>About</Link>
+          <Link to="/contact" style={linkStyle}>Contact</Link>
         </div>
-
         <div style={authSectionStyle}>
+          <Link to="/cart" style={cartButtonStyle}>
+            Cart {cartItemCount > 0 && <span style={badgeStyle}>{cartItemCount}</span>}
+          </Link>
+
           {user ? (
             <>
-              <Link
-                to="/cart"
-                style={cartButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = 'rgba(184,139,90,0.9)'}
-                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent)'}
-              >
-                 Cart
-                {(cartItemCount || cartCount) > 0 && (
-                  <span style={badgeStyle}>{cartItemCount || cartCount}</span>
-                )}
-              </Link>
-              
-              <Link
-                to="/orders"
-                style={ordersButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = 'rgba(75,59,148,0.95)'}
-                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent)'}
-              >
-                 Orders
-              </Link>
-              
-              {/* Updated Profile Button with User Info */}
-              <div style={{ position: 'relative' }}>
-                <button
-                  onClick={handleProfileClick}
-                  style={profileButtonStyle}
-                  onMouseEnter={e => {
-                    e.target.style.backgroundColor = 'rgba(111,66,193,0.95)';
-                    const dropdown = e.target.nextSibling;
-                    if (dropdown) dropdown.style.display = 'block';
-                  }}
-                  onMouseLeave={e => {
-                    e.target.style.backgroundColor = 'var(--accent)';
-                  }}
-                >
-                   {userProfile?.name || user?.name || "Profile"}
-                </button>
-                
-                {/* User Info Dropdown */}
-                <div 
-                  style={userDropdownStyle}
-                  onMouseEnter={e => e.target.style.display = 'block'}
-                  onMouseLeave={e => e.target.style.display = 'none'}
-                >
-                  <div style={{ borderBottom: '1px solid #eee', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
-                    <h4 style={{ margin: 0, color: '#333' }}>
-                      {userProfile?.name || user?.name || 'User'}
-                    </h4>
-                    <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
-                      {userProfile?.email || user?.email || 'No email'}
-                    </p>
-                  </div>
-                  
-                  <button
-                    onClick={handleProfileClick}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      marginTop: '0.5rem',
-                      backgroundColor: '#007bff',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    View Full Profile
-                  </button>
-                </div>
-              </div>
-
-              <button
-                onClick={handleLogout}
-                style={logoutButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = 'var(--danger)'}
-                onMouseLeave={e => e.target.style.backgroundColor = 'var(--danger)'}
-              >
-                Logout
-              </button>
+              <button onClick={handleProfileClick} style={buttonStyle}>{userProfile?.name || user?.name || 'Profile'}</button>
+              <button onClick={handleLogout} style={logoutButtonStyle}>Logout</button>
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                style={buttonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = 'rgba(75,101,255,0.95)'}
-                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent)'}
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                style={signupButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = 'var(--accent-2)'}
-                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent-2)'}
-              >
-                Sign Up
-              </Link>
+              <Link to="/login" style={buttonStyle}>Login</Link>
+              <Link to="/register" style={signupButtonStyle}>Sign Up</Link>
             </>
           )}
         </div>

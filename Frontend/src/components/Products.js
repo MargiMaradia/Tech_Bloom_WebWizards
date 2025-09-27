@@ -32,17 +32,35 @@ function Products() {
   const handleAddToCart = async (product) => {
     try {
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
-        alert('Please login to add products to cart');
-        navigate('/login');
+        // Guest cart using localStorage
+        let guestCart = JSON.parse(localStorage.getItem('guest_cart') || '[]');
+
+        const existing = guestCart.find(item => item.id === product.id);
+        if (existing) {
+          existing.quantity += 1;
+          existing.subtotal = existing.quantity * product.price;
+        } else {
+          guestCart.push({
+            id: product.id,
+            title: product.title,
+            price: product.price,
+            quantity: 1,
+            subtotal: product.price,
+            image: product.thumbnail,
+            description: product.description,
+            category: product.category,
+          });
+        }
+
+        localStorage.setItem('guest_cart', JSON.stringify(guestCart));
+        alert(`✅ ${product.title} added to cart successfully!`);
         return;
       }
 
-      // Set loading state for this specific product
+      // Logged-in user — API call
       setAddingToCart(prev => ({ ...prev, [product.id]: true }));
-
-      console.log('Adding product to cart:', product.id);
 
       const response = await axios.post('http://localhost:5000/api/cart/add', {
         productId: product.id.toString(),
@@ -62,28 +80,24 @@ function Products() {
         }
       });
 
-      console.log('✅ Add to cart response:', response.data);
       alert(`✅ ${product.title} added to cart successfully!`);
-      
+
     } catch (error) {
       console.error('Add to cart error:', {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status
       });
-      
+
       if (error.response?.status === 401) {
         alert('Session expired. Please login again.');
         localStorage.removeItem('token');
         navigate('/login');
-      } else if (error.response?.status === 404) {
-        alert('Product not found in our system.');
       } else {
         const errorMessage = error.response?.data?.message || 'Failed to add to cart';
         alert(`❌ Error: ${errorMessage}`);
       }
     } finally {
-      // Remove loading state for this product
       setAddingToCart(prev => ({ ...prev, [product.id]: false }));
     }
   };
@@ -96,7 +110,6 @@ function Products() {
       return;
     }
     
-    // Navigate to buy now page with product ID
     navigate(`/buy-now/${product.id}`);
   };
 
@@ -123,10 +136,7 @@ function Products() {
 
   return (
     <div className="products-container">
-      <div className="products-header">
-        {/* <h1>Our Products</h1>
-        <p>Discover amazing products at great prices!</p> */}
-      </div>
+      <div className="products-header"></div>
 
       <div className="product-grid">
         {products.map(product => (
@@ -135,15 +145,13 @@ function Products() {
               <img 
                 src={product.thumbnail} 
                 alt={product.title}
-                onError={(e) => {
-                  e.target.src = '/placeholder-image.jpg';
-                }}
+                onError={(e) => { e.target.src = '/placeholder-image.jpg'; }}
               />
-              <div className="product-badge">
-                {product.discountPercentage && 
-                  `${Math.round(product.discountPercentage)}% OFF`
-                }
-              </div>
+              {product.discountPercentage && 
+                <div className="product-badge">
+                  {Math.round(product.discountPercentage)}% OFF
+                </div>
+              }
             </div>
 
             <div className="product-info">
@@ -162,9 +170,7 @@ function Products() {
               </div>
 
               <div className="product-price">
-                <span className="current-price">
-                  ₹{product.price}
-                </span>
+                <span className="current-price">₹{product.price}</span>
                 {product.discountPercentage && (
                   <span className="original-price">
                     ₹{(product.price / (1 - product.discountPercentage/100)).toFixed(0)}
