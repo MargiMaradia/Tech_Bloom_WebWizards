@@ -45,9 +45,9 @@ Users can shop, checkout, and view their order history, while the admin can moni
 
 ## 🛠️ Tech Stack
 
-* **Frontend**: HTML, CSS, JavaScript (React/Vanilla depending on implementation)
+* **Frontend**: HTML, CSS, JavaScript , React
 * **Backend**: Node.js + Express
-* **Database**: MongoDB (or your chosen DB)
+* **Database**: MongoDB 
 * **Authentication**: JWT
 * **Styling**: CSS
 
