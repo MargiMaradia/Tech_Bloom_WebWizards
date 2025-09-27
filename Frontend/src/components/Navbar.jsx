@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-// styles consolidated into App.css
 
-const Navbar = ({ user, setUser }) => {
+// Clean, conflict-free Navbar implementation (inline styles)
+const Navbar = ({ user, setUser, cartCount = 0 }) => {
   const navigate = useNavigate();
   const [cartItemCount, setCartItemCount] = useState(0);
   const [userProfile, setUserProfile] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
-<<<<<<< HEAD
   useEffect(() => {
     if (user) {
       fetchCartCount();
@@ -17,127 +16,37 @@ const Navbar = ({ user, setUser }) => {
     } else {
       setCartItemCount(0);
     }
-=======
-  // --- Helper for guest cart ---
-  const getGuestCart = () => JSON.parse(localStorage.getItem('guest_cart') || '[]');
-
-  // --- Fetch cart count and user profile ---
-  useEffect(() => {
-    updateCartCount();
-    if (user) fetchUserProfile();
-
-    // Listen for guest cart changes in other tabs
-    const handleStorageChange = () => updateCartCount();
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
->>>>>>> 51e334a42fe2461a9e24db3a0029dbff2576946d
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Fetch logged-in user's profile
-  const fetchUserProfile = async () => {
+  const fetchCartCount = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
-      const response = await axios.get('http://localhost:5000/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUserProfile(response.data.user);
-    } catch (err) {
-      console.error('Failed to fetch user profile:', err);
-    }
-  };
-
-  // Fetch cart count (API for logged-in or localStorage for guest)
-  const updateCartCount = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
+      if (token) {
         const response = await axios.get('http://localhost:5000/api/cart', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCartItemCount(response.data.itemCount || 0);
-      } catch (err) {
-        console.error('Failed to fetch cart count:', err);
       }
-    } else {
-      const guestCart = getGuestCart();
-      const count = guestCart.reduce((sum, item) => sum + (item.quantity || 0), 0);
-      setCartItemCount(count);
+    } catch (error) {
+      console.error('Failed to fetch cart count:', error);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setUserProfile(null);
-    setCartItemCount(0);
-    navigate('/');
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const response = await axios.get('http://localhost:5000/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserProfile(response.data.user);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+    }
   };
 
-<<<<<<< HEAD
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setUserProfile(null);
-    setCartItemCount(0);
-    navigate('/');
-  };
-
-  return (
-    <nav className="navbar">
-      <div className="navbar-inner container">
-        <Link to="/" className="logo">ShopEase</Link>
-
-        <div className="nav-wrap">
-          <div className="nav-links">
-            <Link to="/" className="nav-link">Home</Link>
-            <Link to="/products" className="nav-link">Products</Link>
-            <Link to="/about" className="nav-link">About</Link>
-            <Link to="/contact" className="nav-link">Contact</Link>
-          </div>
-        </div>
-
-        <div className="auth-section">
-          {user ? (
-            <>
-              <Link to="/cart" className="btn btn-ghost icon-badge">
-                Cart
-                {(cartItemCount || cartCount) > 0 && (
-                  <span className="badge">{cartItemCount || cartCount}</span>
-                )}
-              </Link>
-
-              <Link to="/orders" className="btn btn-ghost">Orders</Link>
-
-              <div className="profile-wrap">
-                <button
-                  className="btn btn-primary profile-button"
-                  onClick={() => { setShowDropdown(s => !s); }}
-                >
-                  {userProfile?.name || user?.name || 'Profile'}
-                </button>
-
-                <div className={`profile-dropdown ${showDropdown ? 'open' : ''}`}>
-                  <div className="profile-card">
-                    <div>
-                      <strong>{userProfile?.name || user?.name || 'User'}</strong>
-                      <div className="text-muted" style={{fontSize:12}}>{userProfile?.email || user?.email || ''}</div>
-                    </div>
-                    <div>
-                      <button className="btn btn-ghost" onClick={() => navigate('/profile')}>View Profile</button>
-                    </div>
-                  </div>
-                  <div className="dropdown-actions">
-                    <button className="btn btn-ghost" onClick={() => { navigate('/orders'); setShowDropdown(false); }}>My Orders</button>
-                    <button className="btn" onClick={handleLogout}>Logout</button>
-                  </div>
-                </div>
-              </div>
-
-=======
-  const handleProfileClick = () => navigate('/profile');
-
-  // --- Styles ---
   const navbarStyle = {
     backgroundColor: '#333',
     color: '#fff',
@@ -150,41 +59,195 @@ const Navbar = ({ user, setUser }) => {
     top: 0,
     zIndex: 1000
   };
-  const logoStyle = { fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', textDecoration: 'none' };
-  const linksContainerStyle = { display: 'flex', alignItems: 'center', gap: '2rem' };
-  const navLinksStyle = { display: 'flex', alignItems: 'center', gap: '1.5rem' };
-  const linkStyle = { color: '#fff', textDecoration: 'none', padding: '0.5rem 1rem', borderRadius: '4px', transition: 'all 0.3s ease', fontSize: '16px' };
-  const authSectionStyle = { display: 'flex', alignItems: 'center', gap: '1rem' };
-  const buttonStyle = { backgroundColor: '#007bff', color: '#fff', border: 'none', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', transition: 'all 0.3s ease', fontSize: '14px', fontWeight: '500', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' };
-  const cartButtonStyle = { ...buttonStyle, backgroundColor: '#28a745', position: 'relative' };
-  const ordersButtonStyle = { ...buttonStyle, backgroundColor: '#007bff' };
-  const profileButtonStyle = { ...buttonStyle, backgroundColor: '#6f42c1', position: 'relative' };
-  const logoutButtonStyle = { ...buttonStyle, backgroundColor: '#dc3545' };
-  const signupButtonStyle = { ...buttonStyle, backgroundColor: '#28a745' };
-  const badgeStyle = { position: 'absolute', top: '-8px', right: '-8px', backgroundColor: '#dc3545', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: '2px solid #333' };
-  const userDropdownStyle = { position: 'absolute', top: '100%', right: 0, backgroundColor: 'white', color: '#333', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', padding: '1rem', minWidth: '250px', zIndex: 1001, display: 'none' };
+
+  const logoStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    color: '#fff',
+    textDecoration: 'none',
+    transition: 'color 0.3s ease'
+  };
+
+  const linksContainerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2rem'
+  };
+
+  const navLinksStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1.5rem'
+  };
+
+  const linkStyle = {
+    color: '#fff',
+    textDecoration: 'none',
+    padding: '0.5rem 1rem',
+    borderRadius: '4px',
+    transition: 'all 0.3s ease',
+    fontSize: '16px'
+  };
+
+  const authSectionStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem'
+  };
+
+  const buttonStyle = {
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    padding: '0.5rem 1rem',
+    borderRadius: '20px',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    fontSize: '14px',
+    fontWeight: '500',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem'
+  };
+
+  const cartButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: '#28a745',
+    position: 'relative'
+  };
+
+  const ordersButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: '#007bff'
+  };
+
+  const profileButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: '#6f42c1',
+    position: 'relative'
+  };
+
+  const logoutButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: '#dc3545'
+  };
+
+  const signupButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: '#28a745'
+  };
+
+  const badgeStyle = {
+    position: 'absolute',
+    top: '-8px',
+    right: '-8px',
+    backgroundColor: '#dc3545',
+    color: '#fff',
+    borderRadius: '50%',
+    width: '20px',
+    height: '20px',
+    fontSize: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 'bold',
+    border: '2px solid #333'
+  };
+
+  const userDropdownStyle = {
+    position: 'absolute',
+    top: '100%',
+    right: 0,
+    backgroundColor: 'white',
+    color: '#333',
+    borderRadius: '8px',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+    padding: '1rem',
+    minWidth: '250px',
+    zIndex: 1001,
+    display: 'none'
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setUserProfile(null);
+    setCartItemCount(0);
+    navigate('/');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/profile');
+  };
 
   return (
     <nav style={navbarStyle}>
-      <Link to="/" style={logoStyle}>ShopEase</Link>
+      <Link to="/" style={logoStyle}>
+        ShopEase
+      </Link>
 
       <div style={linksContainerStyle}>
         <div style={navLinksStyle}>
-          <Link to="/" style={linkStyle}>Home</Link>
-          <Link to="/products" style={linkStyle}>Products</Link>
-          <Link to="/about" style={linkStyle}>About</Link>
-          <Link to="/contact" style={linkStyle}>Contact</Link>
+          <Link
+            to="/"
+            style={linkStyle}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
+          >
+            Home
+          </Link>
+          <Link
+            to="/products"
+            style={linkStyle}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
+          >
+            Products
+          </Link>
+          <Link
+            to="/about"
+            style={linkStyle}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
+          >
+            About
+          </Link>
+          <Link
+            to="/contact"
+            style={linkStyle}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
+          >
+            Contact
+          </Link>
         </div>
 
         <div style={authSectionStyle}>
-          <Link to="/cart" style={cartButtonStyle}>
-            Cart {cartItemCount > 0 && <span style={badgeStyle}>{cartItemCount}</span>}
-          </Link>
-
           {user ? (
             <>
-              <Link to="/orders" style={ordersButtonStyle}>Orders</Link>
-
+              <Link
+                to="/cart"
+                style={cartButtonStyle}
+                onMouseEnter={e => e.target.style.backgroundColor = '#218838'}
+                onMouseLeave={e => e.target.style.backgroundColor = '#28a745'}
+              >
+                 Cart
+                {(cartItemCount || cartCount) > 0 && (
+                  <span style={badgeStyle}>{cartItemCount || cartCount}</span>
+                )}
+              </Link>
+              
+              <Link
+                to="/orders"
+                style={ordersButtonStyle}
+                onMouseEnter={e => e.target.style.backgroundColor = '#0056b3'}
+                onMouseLeave={e => e.target.style.backgroundColor = '#007bff'}
+              >
+                 Orders
+              </Link>
+              
+              {/* Updated Profile Button with User Info */}
               <div style={{ position: 'relative' }}>
                 <button
                   onClick={handleProfileClick}
@@ -194,32 +257,73 @@ const Navbar = ({ user, setUser }) => {
                     const dropdown = e.target.nextSibling;
                     if (dropdown) dropdown.style.display = 'block';
                   }}
-                  onMouseLeave={e => { e.target.style.backgroundColor = '#6f42c1'; }}
+                  onMouseLeave={e => {
+                    e.target.style.backgroundColor = '#6f42c1';
+                  }}
                 >
-                  {userProfile?.name || user?.name || "Profile"}
+                   {userProfile?.name || user?.name || "Profile"}
                 </button>
-                <div style={userDropdownStyle} onMouseEnter={e => e.target.style.display='block'} onMouseLeave={e => e.target.style.display='none'}>
+                
+                {/* User Info Dropdown */}
+                <div 
+                  style={userDropdownStyle}
+                  onMouseEnter={e => e.target.style.display = 'block'}
+                  onMouseLeave={e => e.target.style.display = 'none'}
+                >
                   <div style={{ borderBottom: '1px solid #eee', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
-                    <h4 style={{ margin: 0 }}>{userProfile?.name || user?.name || 'User'}</h4>
-                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#666' }}>{userProfile?.email || user?.email || 'No email'}</p>
+                    <h4 style={{ margin: 0, color: '#333' }}>
+                      {userProfile?.name || user?.name || 'User'}
+                    </h4>
+                    <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>
+                      {userProfile?.email || user?.email || 'No email'}
+                    </p>
                   </div>
-                  <button onClick={handleProfileClick} style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                  
+                  <button
+                    onClick={handleProfileClick}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      marginTop: '0.5rem',
+                      backgroundColor: '#007bff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
                     View Full Profile
                   </button>
                 </div>
               </div>
 
-              <button onClick={handleLogout} style={logoutButtonStyle}>Logout</button>
->>>>>>> 51e334a42fe2461a9e24db3a0029dbff2576946d
+              <button
+                onClick={handleLogout}
+                style={logoutButtonStyle}
+                onMouseEnter={e => e.target.style.backgroundColor = '#c82333'}
+                onMouseLeave={e => e.target.style.backgroundColor = '#dc3545'}
+              >
+                Logout
+              </button>
             </>
-            ) : (
+          ) : (
             <>
-<<<<<<< HEAD
-              <Link to="/login" className="shop-now">Login</Link>
-=======
-              <Link to="/login" style={buttonStyle}>Login</Link>
-              <Link to="/register" style={signupButtonStyle}>Sign Up</Link>
->>>>>>> 51e334a42fe2461a9e24db3a0029dbff2576946d
+              <Link
+                to="/login"
+                style={buttonStyle}
+                onMouseEnter={e => e.target.style.backgroundColor = '#0056b3'}
+                onMouseLeave={e => e.target.style.backgroundColor = '#007bff'}
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                style={signupButtonStyle}
+                onMouseEnter={e => e.target.style.backgroundColor = '#218838'}
+                onMouseLeave={e => e.target.style.backgroundColor = '#28a745'}
+              >
+                Sign Up
+              </Link>
             </>
           )}
         </div>
