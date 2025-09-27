@@ -48,8 +48,8 @@ Users can shop, checkout, and view their order history, while the admin can moni
 * **Frontend**: HTML, CSS, JavaScript (React/Vanilla depending on implementation)
 * **Backend**: Node.js + Express
 * **Database**: MongoDB (or your chosen DB)
-* **Authentication**: JWT / Session-based login
-* **Styling**: Bootstrap / Tailwind CSS
+* **Authentication**: JWT
+* **Styling**: CSS
 
 ---
 
