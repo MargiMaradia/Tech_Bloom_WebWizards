@@ -45,8 +45,14 @@ Guest Cart
 About
 * <img width="1899" height="911" alt="image" src="https://github.com/user-attachments/assets/0081df1f-8867-4431-9efb-c1103be7ebaa" />
 
+Register
+<img width="1600" height="724" alt="image" src="https://github.com/user-attachments/assets/78b1405c-5a38-4353-b5e9-e2f365835e1b" />
 
+Login 
+<img width="1600" height="725" alt="image" src="https://github.com/user-attachments/assets/9457718a-4bbb-4253-8b32-b4a7b875269f" />
 
+Profile 
+<img width="1600" height="707" alt="image" src="https://github.com/user-attachments/assets/214ca17e-c440-4ae0-9c35-7cebcd854d5b" />
 
 
 ### 🔑 Admin Side
@@ -55,7 +61,15 @@ About
 * View and manage all orders placed by users
 * Monitor shopping activity in real-time
 
----
+Admin Login
+<img width="1600" height="711" alt="image" src="https://github.com/user-attachments/assets/b79abdeb-1fbd-4143-aaf5-796381d4c2d6" />
+
+Admin Dashboard
+
+<img width="1600" height="705" alt="image" src="https://github.com/user-attachments/assets/9936a599-21d5-437b-9004-1905a77724f7" />
+
+
+
 
 ## 🛠️ Tech Stack
 
