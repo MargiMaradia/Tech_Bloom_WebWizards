@@ -35,6 +35,20 @@ Users can shop, checkout, and view their order history, while the admin can moni
 * **Login/Register** for personalized experience
 * View **past orders** anytime
 
+* GUEST USER
+Home Page
+* <img width="1894" height="913" alt="image" src="https://github.com/user-attachments/assets/7535aced-4feb-427d-af8d-f89535521f05" />
+Products Page:
+* <img width="1904" height="910" alt="image" src="https://github.com/user-attachments/assets/15017e09-e727-4111-b261-beb8b68136d5" />
+Guest Cart
+*<img width="1895" height="835" alt="image" src="https://github.com/user-attachments/assets/4c5a4369-1da7-4efa-a7e7-fbe27991c78d" />
+About
+* <img width="1899" height="911" alt="image" src="https://github.com/user-attachments/assets/0081df1f-8867-4431-9efb-c1103be7ebaa" />
+
+
+
+
+
 ### 🔑 Admin Side
 
 * Secure **admin login**
