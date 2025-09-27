@@ -18,6 +18,7 @@ import AdminOrders from './admin/AdminOrders';
 import AdminOrderDetail from './admin/AdminOrderDetail';
 import AdminDashboard from './admin/AdminDashboard';
 import ProtectedAdminRoute from './admin/ProtectedAdminRoute';
+import Footer from './components/Footer';
 
 function App() {
   const [user, setUser] = useState(null); // Track user login state
@@ -109,6 +110,7 @@ function App() {
           </ProtectedAdminRoute>
         } />
       </Routes>
+      <Footer />
     </Router>
   );
 }

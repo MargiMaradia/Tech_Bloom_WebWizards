@@ -1,12 +1,13 @@
 /* Login Container */
 .login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 2rem 1rem;
+/* Modern auth form */
+.login-container{max-width:480px;margin:48px auto;padding:28px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);box-shadow:var(--shadow-card)}
+.auth-title{font-size:1.4rem;margin-bottom:8px;color:var(--text);font-weight:800}
+.auth-sub{color:var(--muted);font-size:0.95rem;margin-bottom:18px}
+.auth-form .input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);margin-bottom:12px}
+.auth-actions{display:flex;gap:8px;align-items:center}
+.btn-primary{background:linear-gradient(90deg,var(--accent),#4f6ef8);color:#061026}
+.btn-secondary{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
 }
 
 /* Login Form Box */

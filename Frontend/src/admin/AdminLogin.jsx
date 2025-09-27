@@ -25,21 +25,21 @@ const AdminLogin = () => {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '60px auto', border: '1px solid #e0e0e0', borderRadius: 8, padding: 24 }}>
+    <div className="auth-panel">
       <h2>Admin Login</h2>
-      {error && <div style={{ color: 'white', background: '#dc3545', padding: 8, borderRadius: 4, marginBottom: 12 }}>{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
+      {error && <div className="message error-message">{error}</div>}
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="form-group">
           <label>Email</label>
-          <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} required style={{ width: '100%', padding: 8, marginTop: 4 }}/>
+          <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} required />
         </div>
-        <div style={{ marginBottom: 12 }}>
+        <div className="form-group">
           <label>Password</label>
-          <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} required style={{ width: '100%', padding: 8, marginTop: 4 }}/>
+          <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} required />
         </div>
-        <button type="submit" disabled={loading} style={{ background: '#007bff', color: 'white', border: 'none', padding: '10px 16px', borderRadius: 4, cursor: 'pointer' }}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
+        <div className="auth-actions">
+          <button type="submit" className="auth-cta auth-primary" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+        </div>
       </form>
     </div>
   );

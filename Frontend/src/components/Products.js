@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Products.css';
+// styles consolidated into App.css
 import axios from 'axios';
 
 function Products() {

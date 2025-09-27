@@ -29,26 +29,23 @@ function ProductCard({ product }) {
     }
   };
 
+  const imageSrc = product.image || product.thumbnail || product.thumbnailUrl || product.photos && product.photos[0] || '';
+
   return (
-    <div className="product-card">
-      <img src={product.image} alt={product.name} />
-      <h3>{product.name}</h3>
-      <p>{product.description}</p>
-      <p className="price">${product.price}</p>
-      <button 
-        onClick={handleAddToCart}
-        className="btn btn-primary"
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer'
-        }}
-      >
-        Add to Cart
-      </button>
+    <div className="product-card card">
+      {imageSrc ? (
+        <div className="product-image"><img src={imageSrc} alt={product.name || product.title} /></div>
+      ) : null}
+      <div className="product-info">
+        <h3 className="product-title">{product.name || product.title}</h3>
+        <p className="product-description">{product.description}</p>
+        <div className="product-price">
+          <div className="current-price">${product.price}</div>
+        </div>
+        <div className="card-actions">
+          <button onClick={handleAddToCart} className="buy-btn">Add to Cart</button>
+        </div>
+      </div>
     </div>
   );
 }

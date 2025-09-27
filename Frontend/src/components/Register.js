@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+// styles consolidated into App.css
 
 function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -31,27 +32,29 @@ function Register() {
   };
 
   return (
-    <div className="container page" style={{ maxWidth: 520 }}>
-      <div className="card shadow">
-        <h2 className="mb-3">Register</h2>
-        {msg && <div className="alert alert-success mb-3">{msg}</div>}
-        {error && <div className="alert alert-danger mb-3">{error}</div>}
-        <form onSubmit={onSubmit} className="form">
-          <div>
-            <label className="label">Name</label>
-            <input className="input" name="name" placeholder="Name" value={form.name} onChange={onChange} required />
-          </div>
-          <div>
-            <label className="label">Email</label>
-            <input className="input" name="email" type="email" placeholder="Email" value={form.email} onChange={onChange} required />
-          </div>
-          <div>
-            <label className="label">Password</label>
-            <input className="input" name="password" type="password" placeholder="Password" value={form.password} onChange={onChange} required />
-          </div>
-          <button type="submit" className="btn btn-primary">Sign Up</button>
-        </form>
-      </div>
+    <div className="auth-panel">
+      <h2>Register</h2>
+      <p>Create your account to get started</p>
+      {msg && <div className="message success-message">{msg}</div>}
+      {error && <div className="message error-message">{error}</div>}
+      <form onSubmit={onSubmit} className="auth-form">
+        <div className="form-group">
+          <label>Name</label>
+          <input className="input" name="name" placeholder="Name" value={form.name} onChange={onChange} required />
+        </div>
+        <div className="form-group">
+          <label>Email</label>
+          <input className="input" name="email" type="email" placeholder="Email" value={form.email} onChange={onChange} required />
+        </div>
+        <div className="form-group">
+          <label>Password</label>
+          <input className="input" name="password" type="password" placeholder="Password" value={form.password} onChange={onChange} required />
+        </div>
+        <div className="auth-actions">
+          <button type="submit" className="auth-cta auth-primary">Sign Up</button>
+          <button type="button" className="auth-cta auth-secondary" onClick={() => navigate('/login')}>Have an account?</button>
+        </div>
+      </form>
     </div>
   );
 }

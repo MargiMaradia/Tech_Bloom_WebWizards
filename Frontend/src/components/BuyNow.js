@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './BuyNow.css';
+// styles consolidated into App.css
 
 function BuyNow() {
   const { productId } = useParams();

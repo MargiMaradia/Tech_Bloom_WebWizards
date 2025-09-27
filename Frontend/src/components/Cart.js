@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './Cart.css';
+// styles consolidated into App.css
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);

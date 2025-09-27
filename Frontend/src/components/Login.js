@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import './Login.css';
+// styles consolidated into App.css
 
 function Login({ setUser }) {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -49,8 +49,8 @@ function Login({ setUser }) {
   };
 
   return (
-    <div className="login-container">
-      <form onSubmit={onSubmit} className="login-form">
+    <div className="auth-panel">
+      <form onSubmit={onSubmit} className="auth-form">
         <h2>Login</h2>
         <p>Welcome back! Please login to your account</p>
 
@@ -90,7 +90,7 @@ function Login({ setUser }) {
 
         <button 
           type="submit" 
-          className={`login-btn ${loading ? 'loading' : ''}`}
+          className={`auth-cta auth-primary ${loading ? 'loading' : ''}`}
           disabled={loading}
         >
           {loading ? 'Logging in...' : 'Login'}
@@ -100,14 +100,12 @@ function Login({ setUser }) {
           <Link to="/forgot-password">Forgot Password?</Link>
         </div>
 
-        <div className="register-link">
-          <p>Don't have an account?</p>
-          <Link to="/register">Sign up here</Link>
+        <div className="register-link auth-note">
+          <p>Don't have an account? <Link className="link-primary" to="/register">Sign up here</Link></p>
         </div>
 
-        <div className="register-link" style={{ marginTop: '12px' }}>
-          <p>Are you an administrator?</p>
-          <Link to="/admin/login">Admin Login</Link>
+        <div className="register-link auth-note" style={{ marginTop: '12px' }}>
+          <p>Are you an administrator? <Link className="link-primary" to="/admin/login">Admin Login</Link></p>
         </div>
       </form>
     </div>

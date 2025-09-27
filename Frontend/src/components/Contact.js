@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Contact.css';
+// styles consolidated into App.css
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -41,7 +41,7 @@ function Contact() {
           <p>Thank you for contacting us. We'll get back to you within 24 hours.</p>
           <button 
             onClick={() => setIsSubmitted(false)} 
-            className="btn-primary"
+            className="shop-now"
           >
             Send Another Message
           </button>
@@ -181,7 +181,7 @@ function Contact() {
 
             <button 
               type="submit" 
-              className="btn-primary"
+              className="shop-now"
               disabled={isLoading}
             >
               {isLoading ? 'Sending...' : 'Send Message'}
