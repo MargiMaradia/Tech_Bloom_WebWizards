@@ -48,13 +48,13 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
   };
 
   const navbarStyle = {
-    backgroundColor: '#333',
-    color: '#fff',
+    backgroundColor: 'var(--footer-bg)',
+    color: 'var(--text)',
     padding: '1rem 2rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
     position: 'sticky',
     top: 0,
     zIndex: 1000
@@ -62,8 +62,8 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
 
   const logoStyle = {
     fontSize: '1.5rem',
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '800',
+    color: 'var(--text)',
     textDecoration: 'none',
     transition: 'color 0.3s ease'
   };
@@ -81,12 +81,13 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
   };
 
   const linkStyle = {
-    color: '#fff',
+    color: 'var(--muted)',
     textDecoration: 'none',
     padding: '0.5rem 1rem',
     borderRadius: '4px',
-    transition: 'all 0.3s ease',
-    fontSize: '16px'
+    transition: 'all 0.18s ease',
+    fontSize: '16px',
+    fontWeight: 700
   };
 
   const authSectionStyle = {
@@ -96,16 +97,16 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
   };
 
   const buttonStyle = {
-    backgroundColor: '#007bff',
+    backgroundColor: 'var(--accent)',
     color: '#fff',
     border: 'none',
     padding: '0.5rem 1rem',
     borderRadius: '20px',
     textDecoration: 'none',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.18s ease',
     fontSize: '14px',
-    fontWeight: '500',
+    fontWeight: '800',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '0.5rem'
@@ -113,36 +114,36 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
 
   const cartButtonStyle = {
     ...buttonStyle,
-    backgroundColor: '#28a745',
+    backgroundColor: 'var(--accent)',
     position: 'relative'
   };
 
   const ordersButtonStyle = {
     ...buttonStyle,
-    backgroundColor: '#007bff'
+    backgroundColor: 'var(--accent)'
   };
 
   const profileButtonStyle = {
     ...buttonStyle,
-    backgroundColor: '#6f42c1',
-    position: 'relative'
+    backgroundColor: 'var(--accent)'
   };
 
   const logoutButtonStyle = {
     ...buttonStyle,
-    backgroundColor: '#dc3545'
+    backgroundColor: 'var(--danger)'
   };
 
   const signupButtonStyle = {
     ...buttonStyle,
-    backgroundColor: '#28a745'
+    backgroundColor: 'var(--accent-2)',
+    color: 'var(--text)'
   };
 
   const badgeStyle = {
     position: 'absolute',
     top: '-8px',
     right: '-8px',
-    backgroundColor: '#dc3545',
+    backgroundColor: 'var(--danger)',
     color: '#fff',
     borderRadius: '50%',
     width: '20px',
@@ -152,7 +153,7 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
     alignItems: 'center',
     justifyContent: 'center',
     fontWeight: 'bold',
-    border: '2px solid #333'
+    border: '2px solid var(--footer-bg)'
   };
 
   const userDropdownStyle = {
@@ -192,7 +193,7 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
           <Link
             to="/"
             style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
             onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
           >
             Home
@@ -200,7 +201,7 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
           <Link
             to="/products"
             style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
             onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
           >
             Products
@@ -208,7 +209,7 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
           <Link
             to="/about"
             style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
             onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
           >
             About
@@ -216,7 +217,7 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
           <Link
             to="/contact"
             style={linkStyle}
-            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+            onMouseEnter={e => e.target.style.backgroundColor = 'rgba(0,0,0,0.03)'}
             onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
           >
             Contact
@@ -229,8 +230,8 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
               <Link
                 to="/cart"
                 style={cartButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = '#218838'}
-                onMouseLeave={e => e.target.style.backgroundColor = '#28a745'}
+                onMouseEnter={e => e.target.style.backgroundColor = 'rgba(184,139,90,0.9)'}
+                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent)'}
               >
                  Cart
                 {(cartItemCount || cartCount) > 0 && (
@@ -241,8 +242,8 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
               <Link
                 to="/orders"
                 style={ordersButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = '#0056b3'}
-                onMouseLeave={e => e.target.style.backgroundColor = '#007bff'}
+                onMouseEnter={e => e.target.style.backgroundColor = 'rgba(75,59,148,0.95)'}
+                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent)'}
               >
                  Orders
               </Link>
@@ -253,12 +254,12 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
                   onClick={handleProfileClick}
                   style={profileButtonStyle}
                   onMouseEnter={e => {
-                    e.target.style.backgroundColor = '#563d7c';
+                    e.target.style.backgroundColor = 'rgba(111,66,193,0.95)';
                     const dropdown = e.target.nextSibling;
                     if (dropdown) dropdown.style.display = 'block';
                   }}
                   onMouseLeave={e => {
-                    e.target.style.backgroundColor = '#6f42c1';
+                    e.target.style.backgroundColor = 'var(--accent)';
                   }}
                 >
                    {userProfile?.name || user?.name || "Profile"}
@@ -300,8 +301,8 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
               <button
                 onClick={handleLogout}
                 style={logoutButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = '#c82333'}
-                onMouseLeave={e => e.target.style.backgroundColor = '#dc3545'}
+                onMouseEnter={e => e.target.style.backgroundColor = 'var(--danger)'}
+                onMouseLeave={e => e.target.style.backgroundColor = 'var(--danger)'}
               >
                 Logout
               </button>
@@ -311,16 +312,16 @@ const Navbar = ({ user, setUser, cartCount = 0 }) => {
               <Link
                 to="/login"
                 style={buttonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = '#0056b3'}
-                onMouseLeave={e => e.target.style.backgroundColor = '#007bff'}
+                onMouseEnter={e => e.target.style.backgroundColor = 'rgba(75,101,255,0.95)'}
+                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent)'}
               >
                 Login
               </Link>
               <Link
                 to="/register"
                 style={signupButtonStyle}
-                onMouseEnter={e => e.target.style.backgroundColor = '#218838'}
-                onMouseLeave={e => e.target.style.backgroundColor = '#28a745'}
+                onMouseEnter={e => e.target.style.backgroundColor = 'var(--accent-2)'}
+                onMouseLeave={e => e.target.style.backgroundColor = 'var(--accent-2)'}
               >
                 Sign Up
               </Link>
