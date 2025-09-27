@@ -1,0 +1,53 @@
+.hero {
+  padding: 2rem 0 3.5rem 0;
+  background: #eaf1ff;
+  text-align: center;
+}
+.hero h1 {
+  color: #2549d7;
+  font-size: 2.7rem;
+  margin-bottom: 0.6rem;
+  font-weight: bold;
+}
+.hero p {
+  color: #2b2e3c;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+.shop-now {
+  background: #246be7;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.8rem 2.2rem;
+  font-size: 1.15rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+.features-list {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+.feature-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 32px #2a35581a;
+  padding: 2rem 2.2rem;
+  text-align: center;
+  width: 330px;
+  transition: box-shadow 0.2s;
+}
+.feature-card:hover {
+  box-shadow: 0 8px 40px #2a35583d;
+}
+.icon {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
+.feature-card h3 {
+  font-weight: bold;
+  margin-bottom: 0.7rem;
+  font-size: 1.22rem;
+}
